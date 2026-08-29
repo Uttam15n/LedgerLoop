@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "finance-controller"
+version = "0.1.0"
+description = "AI Finance Controller — multi-source reconciliation agent (invoices, bank transactions, UPI payments)"
+requires-python = ">=3.10"
+
+dependencies = [
+    "streamlit==1.38.0",
+    "pandas==2.2.2",
+    "sqlalchemy==2.0.32",
+    "openpyxl==3.1.5",
+    "python-dotenv==1.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.2",
+]
+# Phase 3: only these three packages are needed. langchain-core gives us
+# the @tool decorator and message types; langgraph gives us the graph
+# orchestration; langchain-groq is the LLM client (Groq's fast inference
+# API -- everything else in agents/ is provider-agnostic, so this is the
+# only line that would need to change to switch providers again later).
+agents = [
+    "langgraph==0.2.34",
+    "langchain-core==0.3.15",
+    "langchain-groq==0.2.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

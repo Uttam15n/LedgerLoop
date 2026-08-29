@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: finance-controller
+Version: 0.1.0
+Summary: AI Finance Controller — multi-source reconciliation agent (invoices, bank transactions, UPI payments)
+Requires-Python: >=3.10
+Requires-Dist: streamlit==1.38.0
+Requires-Dist: pandas==2.2.2
+Requires-Dist: sqlalchemy==2.0.32
+Requires-Dist: openpyxl==3.1.5
+Requires-Dist: python-dotenv==1.0.1
+Provides-Extra: dev
+Requires-Dist: pytest==8.3.2; extra == "dev"
+Provides-Extra: agents
+Requires-Dist: langgraph==0.2.34; extra == "agents"
+Requires-Dist: langchain-core==0.3.15; extra == "agents"
+Requires-Dist: langchain-groq==0.2.1; extra == "agents"

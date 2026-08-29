@@ -1,0 +1,13 @@
+streamlit==1.38.0
+pandas==2.2.2
+sqlalchemy==2.0.32
+openpyxl==3.1.5
+python-dotenv==1.0.1
+
+[agents]
+langgraph==0.2.34
+langchain-core==0.3.15
+langchain-groq==0.2.1
+
+[dev]
+pytest==8.3.2
