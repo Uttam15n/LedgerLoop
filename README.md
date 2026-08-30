@@ -270,13 +270,6 @@ The system follows a **deterministic-first, agent-assisted reconciliation pipeli
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Processing Philosophy
-
-**Deterministic first → Agentic reasoning only when needed**
-
-The system does not send every record to an LLM. Straightforward matches are resolved using deterministic scoring, while only ambiguous or unresolved cases are escalated to the agentic workflow. This keeps the reconciliation process **efficient, explainable, and controlled**.
-
-
 # 7. Security Design
 
 The agent chain never has open-ended database access:
@@ -291,29 +284,27 @@ The agent chain never has open-ended database access:
 
 # 8. Screenshots
 
-> Add your own screenshots here after running the app locally — save them into a `docs/screenshots/` folder and reference them below.
-
-## Dashboard
+## a) Dashboard
 
 <img width="1917" height="957" alt="Screenshot 2026-08-30 152424" src="https://github.com/user-attachments/assets/c7d1cc2a-11a1-46c3-855c-8237bb981d1d" />
 
 
 ---
 
-## Reconciliation Dashboard
+## b) Reconciliation Dashboard
 
 <img width="1916" height="962" alt="Screenshot 2026-08-30 152910" src="https://github.com/user-attachments/assets/d354a66c-c3db-4b68-9f19-62fb7d0fe7a5" />
 
 
 ---
 
-## Reconciliation Report
+## c) Reconciliation Report
 
 <img width="1915" height="953" alt="Screenshot 2026-08-30 152944" src="https://github.com/user-attachments/assets/22079a4b-adf6-4ee8-8a8f-171e640da973" />
 
 ---
 
-## Chat Assistant
+## d) Chat Assistant
 
 <img width="1917" height="963" alt="Screenshot 2026-08-30 153410" src="https://github.com/user-attachments/assets/d66602a9-70a0-4bb2-9c04-ddb2b0874932" />
 
