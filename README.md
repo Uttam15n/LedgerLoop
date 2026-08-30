@@ -1,4 +1,4 @@
-# 💰 AuditAgent — AI Finance Controller
+# AuditAgent — AI Finance Controller
 
 <p align="center">
 
@@ -14,7 +14,7 @@
 
 ---
 
-# 📖 Overview
+# 1. Overview
 
 AuditAgent is a multi-source finance reconciliation system that closes a real finance-ops loop: matching **invoices**, **UPI payments**, and **bank transactions** against each other to verify which ones genuinely settle — and honestly reporting which ones don't.
 
@@ -26,7 +26,7 @@ The project integrates **LangGraph**, **LangChain**, **Groq**, **SQLAlchemy + SQ
 
 ---
 
-# ✨ Features
+# 2. Features
 
 - 📥 Generate synthetic test data, or upload your own invoice / payment / bank transaction data (CSV, XLSX, or a single multi-sheet Excel workbook)
 - ⚡ Deterministic matching engine — reference, amount, date, and text scoring with proper one-to-one assignment (correctly catches duplicate candidates)
@@ -40,7 +40,7 @@ The project integrates **LangGraph**, **LangChain**, **Groq**, **SQLAlchemy + SQ
 
 ---
 
-# 🏗️ System Architecture
+# 3. System Architecture
 
 ```mermaid
 flowchart TD
@@ -80,7 +80,7 @@ An invoice only counts as **fully reconciled** once both hops are confidently li
 
 ---
 
-# 🔄 Workflow
+# 4. Workflow
 
 ```mermaid
 sequenceDiagram
@@ -116,7 +116,7 @@ sequenceDiagram
 
 ---
 
-# 🛠 Tech Stack
+# 5. Tech Stack
 
 | Category | Technologies |
 |----------|--------------|
@@ -132,7 +132,7 @@ sequenceDiagram
 
 ---
 
-# ⚙️ Installation
+# 6. Installation
 
 Clone the repository
 
@@ -170,7 +170,7 @@ pip install -e ".[agents]"
 
 ---
 
-# 🔑 Environment Variables
+# 7. Environment Variables
 
 Create a `.env` in the project root
 
@@ -182,7 +182,7 @@ Get a free key at [console.groq.com](https://console.groq.com).
 
 ---
 
-# ▶️ Run Application
+# 5. Run Application
 
 ```bash
 streamlit run app/streamlit_app.py
@@ -196,7 +196,7 @@ python run_full_pipeline.py
 
 ---
 
-# 💡 How It Works
+# 6. How It Works
 
 ### Step 1
 
@@ -234,7 +234,7 @@ Every record lands in exactly one bucket — auto-approved, human review, or a c
 
 ---
 
-# 🔐 Security Design
+# 7. Security Design
 
 The agent chain never has open-ended database access:
 
@@ -246,7 +246,7 @@ The agent chain never has open-ended database access:
 
 ---
 
-# 📸 Screenshots
+# 8. Screenshots
 
 > Add your own screenshots here after running the app locally — save them into a `docs/screenshots/` folder and reference them below.
 
@@ -274,16 +274,6 @@ The agent chain never has open-ended database access:
 
 ---
 
-# 🚀 Future Improvements
-
-- Ground-truth precision/recall scoring surfaced directly in the UI
-- A genuine LLM-driven router once a third data source (e.g. a second ERP) is added
-- Forward cash forecasting on top of the same reconciled data
-- Docker support
-- Cloud deployment
-- Multi-user, multi-tenant support
-- Streaming responses in the Assistant chat
-
 ---
 
 # 📈 Learning Outcomes
@@ -299,30 +289,7 @@ This project strengthened my understanding of:
 - Building a real multi-page Streamlit product, not just a script
 
 ---
-
-# 🤝 Contributing
-
-Contributions are welcome.
-
-If you would like to improve the project:
-
-1. Fork the repository
-
-2. Create a feature branch
-
-3. Commit your changes
-
-4. Open a Pull Request
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-# 👨‍💻 Author
+# 9. Author
 
 **Uttam N**
 
@@ -338,4 +305,3 @@ Passionate about
 
 ---
 
-## ⭐ If you found this project useful, consider giving it a star!
