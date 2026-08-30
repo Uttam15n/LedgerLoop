@@ -202,27 +202,27 @@ The system follows a **deterministic-first, agent-assisted reconciliation pipeli
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│  1. UPLOAD / GENERATE DATA                                 │
+│  1. UPLOAD / GENERATE DATA                                  │
 │                                                             │
-│  Upload invoices, payments, or bank transactions —         │
-│  or generate a synthetic test batch.                       │
+│  Upload invoices, payments, or bank transactions —          │
+│  or generate a synthetic test batch.                        │
 └──────────────────────────────┬──────────────────────────────┘
                                ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  2. VALIDATE & STAGE                                        │
 │                                                             │
 │  Input data is schema-validated and staged into SQLite      │
-│  for consistent and reliable processing.                   │
+│  for consistent and reliable processing.                    │
 └──────────────────────────────┬──────────────────────────────┘
                                ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  3. DETERMINISTIC MATCHING                                 │
+│  3. DETERMINISTIC MATCHING                                  │
 │                                                             │
-│  Every possible pair is scored using:                      │
-│    • Reference / ID match                                  │
-│    • Amount match                                          │
-│    • Date proximity                                        │
-│    • Text similarity                                       │
+│  Every possible pair is scored using:                       │
+│    • Reference / ID match                                   │
+│    • Amount match                                           │
+│    • Date proximity                                         │
+│    • Text similarity                                        │
 │                                                             │
 │  A global one-to-one assignment resolves the batch          │
 │  instead of making independent record-level decisions.      │
@@ -233,40 +233,40 @@ The system follows a **deterministic-first, agent-assisted reconciliation pipeli
                     └──────────┬───────────┘
                          YES ↙     ↘ NO
                             ↓       ↓
-                 ┌──────────────┐  ┌─────────────────────────┐
-                 │ AUTO-APPROVED │  │ 4. AGENT ESCALATION     │
-                 └──────────────┘  │                         │
+                 ┌──────────────┐   ┌─────────────────────────┐
+                 │ AUTO-APPROVED│   │ 4. AGENT ESCALATION     │
+                 └──────────────┘   │                         │
                                     │ Unresolved records are  │
                                     │ passed to the LangGraph │
-                                    │ agent chain.             │
+                                    │ agent chain.            │
                                     └────────────┬────────────┘
                                                  ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  5. AGENTIC INVESTIGATION                                  │
+│  5. AGENTIC INVESTIGATION                                   │
 │                                                             │
 │  Router Agent                                               │
 │       ↓                                                     │
 │  Identifies what information is missing                     │
 │       ↓                                                     │
-│  Search Agent                                                │
+│  Search Agent                                               │
 │       ↓                                                     │
-│  Queries SQLite using read-only, parameterized tools         │
+│  Queries SQLite using read-only, parameterized tools        │
 │       ↓                                                     │
 │  Reasoning Agent (Groq)                                     │
 │       ↓                                                     │
-│  Determines the final outcome, confidence score,             │
+│  Determines the final outcome, confidence score,            │
 │  and plain-English justification.                           │
 └──────────────────────────────┬──────────────────────────────┘
                                ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  6. FINAL CLASSIFICATION & REPORTING                        │
 │                                                             │
-│  Every record is assigned to exactly one outcome:            │
+│  Every record is assigned to exactly one outcome:           │
 │                                                             │
-│     ✓ Auto-Approved     ⚠ Human Review     ✕ Exception      │
+│     ✓ Auto-Approved     ⚠ Human Review    ✕ Exception      |
 │                                                             │
-│  Results are compiled into a downloadable reconciliation     │
-│  report with the decision, confidence, and reasoning.        │
+│  Results are compiled into a downloadable reconciliation    │
+│  report with the decision, confidence, and reasoning.       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
