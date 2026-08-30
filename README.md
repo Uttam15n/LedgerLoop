@@ -196,43 +196,86 @@ python run_full_pipeline.py
 
 ---
 
-# 6. How It Works
+## 6. How It Works
 
-### Step 1
+The system follows a **deterministic-first, agent-assisted reconciliation pipeline**:
 
-Upload your own invoice / payment / bank transaction files, or generate a synthetic test batch.
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  1. UPLOAD / GENERATE DATA                                 │
+│                                                             │
+│  Upload invoices, payments, or bank transactions —         │
+│  or generate a synthetic test batch.                       │
+└──────────────────────────────┬──────────────────────────────┘
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│  2. VALIDATE & STAGE                                        │
+│                                                             │
+│  Input data is schema-validated and staged into SQLite      │
+│  for consistent and reliable processing.                   │
+└──────────────────────────────┬──────────────────────────────┘
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│  3. DETERMINISTIC MATCHING                                 │
+│                                                             │
+│  Every possible pair is scored using:                      │
+│    • Reference / ID match                                  │
+│    • Amount match                                          │
+│    • Date proximity                                        │
+│    • Text similarity                                       │
+│                                                             │
+│  A global one-to-one assignment resolves the batch          │
+│  instead of making independent record-level decisions.      │
+└──────────────────────────────┬──────────────────────────────┘
+                               ↓
+                    ┌──────────────────────┐
+                    │ Confidently resolved?│
+                    └──────────┬───────────┘
+                         YES ↙     ↘ NO
+                            ↓       ↓
+                 ┌──────────────┐  ┌─────────────────────────┐
+                 │ AUTO-APPROVED │  │ 4. AGENT ESCALATION     │
+                 └──────────────┘  │                         │
+                                    │ Unresolved records are  │
+                                    │ passed to the LangGraph │
+                                    │ agent chain.             │
+                                    └────────────┬────────────┘
+                                                 ↓
+┌─────────────────────────────────────────────────────────────┐
+│  5. AGENTIC INVESTIGATION                                  │
+│                                                             │
+│  Router Agent                                               │
+│       ↓                                                     │
+│  Identifies what information is missing                     │
+│       ↓                                                     │
+│  Search Agent                                                │
+│       ↓                                                     │
+│  Queries SQLite using read-only, parameterized tools         │
+│       ↓                                                     │
+│  Reasoning Agent (Groq)                                     │
+│       ↓                                                     │
+│  Determines the final outcome, confidence score,             │
+│  and plain-English justification.                           │
+└──────────────────────────────┬──────────────────────────────┘
+                               ↓
+┌─────────────────────────────────────────────────────────────┐
+│  6. FINAL CLASSIFICATION & REPORTING                        │
+│                                                             │
+│  Every record is assigned to exactly one outcome:            │
+│                                                             │
+│     ✓ Auto-Approved     ⚠ Human Review     ✕ Exception      │
+│                                                             │
+│  Results are compiled into a downloadable reconciliation     │
+│  report with the decision, confidence, and reasoning.        │
+└─────────────────────────────────────────────────────────────┘
+```
 
-↓
+### Processing Philosophy
 
-### Step 2
+**Deterministic first → Agentic reasoning only when needed**
 
-Data is schema-validated and staged into a SQLite database.
+The system does not send every record to an LLM. Straightforward matches are resolved using deterministic scoring, while only ambiguous or unresolved cases are escalated to the agentic workflow. This keeps the reconciliation process **efficient, explainable, and controlled**.
 
-↓
-
-### Step 3
-
-The deterministic matcher scores every possible pair on reference match, amount match, date proximity, and text similarity — then resolves a one-to-one assignment across the whole batch at once.
-
-↓
-
-### Step 4
-
-Records the deterministic pass couldn't confidently resolve are escalated to the LangGraph agent chain.
-
-↓
-
-### Step 5
-
-A router agent decides what's missing; a search agent queries the database through read-only, parameterized tools; a reasoning agent (Groq) decides the final outcome with a confidence score and a plain-English justification.
-
-↓
-
-### Step 6
-
-Every record lands in exactly one bucket — auto-approved, human review, or a categorized exception — compiled into a downloadable report.
-
----
 
 # 7. Security Design
 
@@ -252,41 +295,27 @@ The agent chain never has open-ended database access:
 
 ## Dashboard
 
-<!-- <img width="1588" alt="Dashboard" src="docs/screenshots/dashboard.png" /> -->
+<img width="1917" height="957" alt="Screenshot 2026-08-30 152424" src="https://github.com/user-attachments/assets/c7d1cc2a-11a1-46c3-855c-8237bb981d1d" />
+
+
+---
+
+## Reconciliation Dashboard
+
+<img width="1916" height="962" alt="Screenshot 2026-08-30 152910" src="https://github.com/user-attachments/assets/d354a66c-c3db-4b68-9f19-62fb7d0fe7a5" />
+
 
 ---
 
 ## Reconciliation Report
 
-<!-- <img width="1588" alt="Reconciliation report" src="docs/screenshots/reconciliation-report.png" /> -->
-
----
-
-## Verify a Single Invoice
-
-<!-- <img width="1588" alt="Verify single invoice" src="docs/screenshots/verify-single-invoice.png" /> -->
+<img width="1915" height="953" alt="Screenshot 2026-08-30 152944" src="https://github.com/user-attachments/assets/22079a4b-adf6-4ee8-8a8f-171e640da973" />
 
 ---
 
 ## Chat Assistant
 
-<!-- <img width="1588" alt="Chat assistant" src="docs/screenshots/chat-assistant.png" /> -->
-
----
-
----
-
-# 📈 Learning Outcomes
-
-This project strengthened my understanding of:
-
-- Deterministic vs. agentic system design, and when to use which
-- LangGraph stateful agent workflows
-- Secure tool-calling design (parameterized queries, whitelisting, prompt-injection defense)
-- One-to-one bipartite assignment for record matching
-- Confidence scoring and honest exception reporting
-- LLM orchestration with Groq
-- Building a real multi-page Streamlit product, not just a script
+<img width="1917" height="963" alt="Screenshot 2026-08-30 153410" src="https://github.com/user-attachments/assets/d66602a9-70a0-4bb2-9c04-ddb2b0874932" />
 
 ---
 # 9. Author
