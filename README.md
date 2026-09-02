@@ -1,4 +1,4 @@
-# AuditAgent — AI Finance Controller
+# LedgerLoop — AI Finance Controller
 
 <p align="center">
 
