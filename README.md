@@ -113,10 +113,98 @@ sequenceDiagram
 
     Streamlit-->>User: Report + downloadable CSV
 ```
+# 5. Meet Agents
+This project has four distinct agents, each with a different job, a different amount of autonomy, and different tools. It's worth understanding the difference — not everything here is "an LLM," and that's deliberate.
+
+```mermaid
+flowchart TB
+    subgraph RouterAgent["1. Router Agent — Deterministic (no LLM)"]
+        direction LR
+        R1["Input:<br/>Phase 2's findings<br/>(which hop is unresolved)"] --> R2["Output:<br/>search payment, bank_transaction, or both"]
+    end
+
+    subgraph SearchAgent["2. Search Agent — Tool-calling"]
+        direction LR
+        S1["Input:<br/>router's decision +<br/>record details"] --> S2["Calls:<br/>search_by_reference<br/>search_by_amount_range<br/>search_by_date_range"]
+        S2 --> S3["Output:<br/>candidate records"]
+    end
+
+    subgraph ReasoningAgent["3. Reasoning Agent — Groq LLM"]
+        direction LR
+        E1["Input:<br/>record + Phase 2 context<br/>+ candidates found"] --> E2["Output:<br/>status, confidence,<br/>plain-English justification"]
+    end
+
+    subgraph ChatAgent["4. Chat Assistant — Groq LLM"]
+        direction LR
+        C1["Input:<br/>any free-form<br/>user question"] --> C2["Calls the same<br/>read-only tools"]
+        C2 --> C3["Output:<br/>grounded, conversational answer"]
+    end
+
+    RouterAgent --> SearchAgent --> ReasoningAgent
+```
+
+| # | Agent | Type | What it decides | Tools it can use |
+|---|-------|------|------------------|-------------------|
+| 1 | **Router Agent** | Deterministic (plain Python, no LLM) | Whether the missing link is on the payment side, the bank side, or both — based on exactly which hop Phase 2 couldn't resolve | None — pure logic |
+| 2 | **Search Agent** | Rule-driven tool-calling | What to actually look up, broadening the search only if a tighter search comes up empty | 3 fixed, read-only, parameterized tools — never raw SQL |
+| 3 | **Reasoning Agent** | LLM (Groq `openai/gpt-oss-120b`) | The final call: match, needs human review, or a genuine exception — with a confidence score and a written justification | None directly — reasons over what the Search Agent already found |
+| 4 | **Chat Assistant** | LLM (Groq) + tool-calling loop | What to search for, based on a free-form question, and how to answer it | The same 3 read-only tools as the Search Agent |
 
 ---
+# 6. Project Structure
+finance_controller/
+|
+|-- app/                              # Streamlit UI
+|   |-- streamlit_app.py               # entry point, theme, sidebar navigation
+|   |-- theme.py                       # design tokens, CSS, the ledger-strip component
+|   `-- views/
+|       |-- dashboard.py               # DB status + last run summary
+|       |-- ingestion.py               # generate / upload / validate / load data
+|       |-- reconciliation.py          # run bulk verification, view report, single-invoice verify
+|       `-- chat.py                    # Settlement Q&A chat assistant
+|
+|-- src/finance_controller/
+|   |-- config/
+|   |   `-- settings.py                # schemas, tolerances, paths -- single source of truth
+|   |
+|   |-- ingestion/
+|   |   |-- synthetic.py               # generates the synthetic test batch + ground truth
+|   |   |-- loaders.py                 # CSV / XLSX / multi-sheet workbook reading
+|   |   `-- validators.py              # schema validation gate
+|   |
+|   |-- db/
+|   |   |-- models.py                  # SQLAlchemy ORM tables
+|   |   |-- session.py                 # engine + session factory
+|   |   `-- repository.py              # typed read/write functions, including reset
+|   |
+|   |-- matching/                      # Phase 2 -- deterministic matcher (no LLM)
+|   |   |-- scoring.py                 # pair scoring: reference, amount, date, text
+|   |   |-- matcher.py                 # candidate generation + one-to-one assignment
+|   |   `-- pipeline.py                # runs both hops, rolls up final status
+|   |
+|   |-- agents/                        # Phase 3 -- the LangGraph agent chain
+|   |   |-- tools.py                   # read-only, parameterized search tools
+|   |   |-- chat_tools.py              # LangChain @tool wrappers for the chat assistant
+|   |   |-- state.py                   # shared graph state schema
+|   |   |-- nodes.py                   # router, search, reasoning node implementations
+|   |   `-- graph.py                   # LangGraph wiring + batch / single-record runners
+|   |
+|   |-- reporting/
+|   |   |-- report.py                  # combines Phase 2 + 3 into the final report
+|   |   `-- evaluation.py              # scores the report against ground truth
+|   |
+|   `-- utils/
+|       `-- logger.py                  # structured audit trail (JSONL)
+|
+|-- run_full_pipeline.py               # standalone end-to-end script (no UI)
+|-- pyproject.toml                     # package + dependencies
+|-- .env.example                       # copy to .env and add your GROQ_API_KEY
+|-- .streamlit/config.toml             # dark theme configuration
+`-- data/                              # raw uploads, staging.db (gitignored)
 
-# 5. Tech Stack
+
+
+# 7. Tech Stack
 
 | Category | Technologies |
 |----------|--------------|
@@ -132,7 +220,7 @@ sequenceDiagram
 
 ---
 
-# 6. Installation
+# 8. Installation
 
 Clone the repository
 
@@ -170,7 +258,7 @@ pip install -e ".[agents]"
 
 ---
 
-# 7. Environment Variables
+# 8. Environment Variables
 
 Create a `.env` in the project root
 
@@ -182,7 +270,7 @@ Get a free key at [console.groq.com](https://console.groq.com).
 
 ---
 
-# 5. Run Application
+# 9. Run Application
 
 ```bash
 streamlit run app/streamlit_app.py
@@ -196,7 +284,7 @@ python run_full_pipeline.py
 
 ---
 
-## 6. How It Works
+## 10. How It Works
 
 The system follows a **deterministic-first, agent-assisted reconciliation pipeline**:
 
@@ -269,8 +357,56 @@ The system follows a **deterministic-first, agent-assisted reconciliation pipeli
 │  report with the decision, confidence, and reasoning.       │
 └─────────────────────────────────────────────────────────────┘
 ```
+# 11. Example Run (Evaluation Report)
+This is real, unedited output from python run_full_pipeline.py, run on a generated 55-invoice synthetic batch. Numbers vary slightly run to run since the synthetic generator randomizes dates and amounts within each seeded case type — but the shape of the result is consistent.
 
-# 7. Security Design
+Running Phase 2: deterministic matcher...
+  24/55 auto-resolved deterministically
+  31 escalated to the agent chain
+
+Running Phase 3: agent chain on 31 escalated records...
+
+============================================================
+RECONCILIATION REPORT
+============================================================
+Total invoices processed: 55
+Phase 2 deterministic auto-match rate: 43.6%
+Final resolution rate (after agent chain): 87.3%
+
+Bucket breakdown:
+  auto_approved  :  48  (87.3%)
+  human_review   :   4  (7.3%)
+  exception      :   3  (5.5%)
+
+Exception categories:
+  missing_bank_hit    : 2
+  missing_payment     : 1
+
+Phase 3 (agent chain) stats:
+  records_escalated_to_agent_chain: 31
+  additionally_resolved_by_agents: 24
+  total_search_tool_calls: 40
+============================================================
+
+============================================================
+EVALUATION AGAINST GROUND TRUTH
+============================================================
+Overall accuracy: 76.4%  (55 records)
+
+Confusion matrix (rows = expected, columns = actual):
+actual_bucket    auto_approved  human_review  exception
+expected_bucket
+auto_approved               37             0          0
+human_review                11             2          0
+exception                    0             2          3
+
+Per-bucket precision / recall:
+  auto_approved    precision=77.1%  recall=100.0%
+  human_review     precision=50.0%  recall=15.4%
+  exception        precision=100.0%  recall=60.0%
+============================================================
+
+# 11. Security Design
 
 The agent chain never has open-ended database access:
 
@@ -282,7 +418,7 @@ The agent chain never has open-ended database access:
 
 ---
 
-# 8. Screenshots
+# 12. Screenshots
 
 ## a) Dashboard
 
@@ -309,7 +445,7 @@ The agent chain never has open-ended database access:
 <img width="1917" height="963" alt="Screenshot 2026-08-30 153410" src="https://github.com/user-attachments/assets/d66602a9-70a0-4bb2-9c04-ddb2b0874932" />
 
 ---
-# 9. Author
+# 13. Author
 
 **Uttam N**
 
