@@ -14,6 +14,7 @@ from finance_controller.db.repository import get_all
 from finance_controller.matching.pipeline import run_reconciliation
 from finance_controller.agents.graph import run_agent_chain, verify_single_record
 from finance_controller.reporting.report import build_report
+from finance_controller.reporting.evaluation import evaluate_against_ground_truth
 from app.theme import ledger_strip, status_badge
 
 st.title("Reconciliation")
@@ -150,6 +151,56 @@ if report is not None:
             data=df.to_csv(index=False),
             file_name="reconciliation_report.csv",
             mime="text/csv",
+        )
+
+    # -----------------------------------------------------------------------
+    # Ground-truth evaluation -- only possible when synthetic data (with a
+    # known answer key) was used. Real uploaded data has no ground truth
+    # to score against, so this section is skipped for that case.
+    # -----------------------------------------------------------------------
+    ground_truth = st.session_state.get("ground_truth")
+    if ground_truth is not None:
+        st.write("")
+        with st.container(border=True):
+            st.subheader("Evaluation against ground truth")
+            st.caption(
+                "This measures how often the system's decision was actually correct, "
+                "scored against the synthetic data's known answer key — not just self-reported buckets."
+            )
+
+            evaluation = evaluate_against_ground_truth(df, ground_truth)
+
+            e1, e2 = st.columns(2)
+            e1.metric("Overall accuracy", f"{evaluation.overall_accuracy:.1%}")
+            e2.metric("Records scored", evaluation.total_records)
+
+            st.write("")
+            st.caption("Precision / recall per bucket")
+            pr_cols = st.columns(3)
+            for col, bucket in zip(pr_cols, ["auto_approved", "human_review", "exception"]):
+                p = evaluation.per_bucket_precision.get(bucket, float("nan"))
+                r = evaluation.per_bucket_recall.get(bucket, float("nan"))
+                col.metric(bucket.replace("_", " ").title(), f"P {p:.0%} / R {r:.0%}")
+
+            st.write("")
+            st.caption("Confusion matrix (rows = expected, columns = actual)")
+            st.dataframe(evaluation.confusion_matrix, use_container_width=True)
+
+            st.write("")
+            st.caption("Accuracy by synthetic case type")
+            st.dataframe(evaluation.per_case_type_accuracy, use_container_width=True)
+
+            if not evaluation.mismatches.empty:
+                st.write("")
+                with st.expander(f"{len(evaluation.mismatches)} mismatch(es)"):
+                    st.dataframe(
+                        evaluation.mismatches[["invoice_id", "case_type", "expected_bucket", "actual_bucket"]],
+                        use_container_width=True, hide_index=True,
+                    )
+    else:
+        st.caption(
+            "Ground-truth evaluation is only available when synthetic data was generated "
+            "(the known answer key isn't available for your own uploaded data)."
         )
 
 # ---------------------------------------------------------------------------

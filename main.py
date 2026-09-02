@@ -17,13 +17,14 @@ from finance_controller.ingestion.synthetic import generate_synthetic_batch, sav
 from finance_controller.matching.pipeline import run_reconciliation
 from finance_controller.agents.graph import run_agent_chain
 from finance_controller.reporting.report import build_report
+from finance_controller.reporting.evaluation import evaluate_against_ground_truth
 from finance_controller.db.session import init_db
 from finance_controller.db.repository import load_dataframe
 from finance_controller.ingestion.validators import coerce_dataframe
 
 print("Generating synthetic batch (55+ invoices)...")
 batch = generate_synthetic_batch()
-invoice, payment, bank = batch["invoice"], batch["payment"], batch["bank_transaction"]
+invoice, payment, bank, ground_truth = batch["invoice"], batch["payment"], batch["bank_transaction"], batch["ground_truth"]
 save_synthetic_batch_to_raw(batch)
 
 print("Loading into staging database (so agent search tools have real data)...")
@@ -50,3 +51,15 @@ df = report.to_dataframe()
 df.to_csv("data/processed/final_report.csv", index=False)
 print()
 print("Detailed per-invoice report saved to data/processed/final_report.csv")
+
+# Ground-truth evaluation -- this is the REAL measured-accuracy number,
+# scored against the synthetic data's known answer key (never seen by
+# the matcher or agents), not just self-reported bucket counts.
+print()
+print("Scoring against ground truth...")
+evaluation = evaluate_against_ground_truth(df, ground_truth)
+print()
+evaluation.print_summary()
+evaluation.mismatches.to_csv("data/processed/evaluation_mismatches.csv", index=False)
+print()
+print("Mismatches (if any) saved to data/processed/evaluation_mismatches.csv")

@@ -7,6 +7,7 @@ src/finance_controller.egg-info/dependency_links.txt
 src/finance_controller.egg-info/requires.txt
 src/finance_controller.egg-info/top_level.txt
 src/finance_controller/agents/__init__.py
+src/finance_controller/agents/chat_tools.py
 src/finance_controller/agents/graph.py
 src/finance_controller/agents/nodes.py
 src/finance_controller/agents/state.py
@@ -26,6 +27,8 @@ src/finance_controller/matching/matcher.py
 src/finance_controller/matching/pipeline.py
 src/finance_controller/matching/scoring.py
 src/finance_controller/reporting/__init__.py
+src/finance_controller/reporting/evaluation.py
+src/finance_controller/reporting/report.py
 src/finance_controller/utils/__init__.py
 src/finance_controller/utils/logger.py
 tests/test_ingestion.py
