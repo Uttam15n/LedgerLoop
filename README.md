@@ -152,6 +152,7 @@ flowchart TB
 
 ---
 # 6. Project Structure
+```
 finance_controller/
 |
 |-- app/                              # Streamlit UI
@@ -201,8 +202,7 @@ finance_controller/
 |-- .env.example                       # copy to .env and add your GROQ_API_KEY
 |-- .streamlit/config.toml             # dark theme configuration
 `-- data/                              # raw uploads, staging.db (gitignored)
-
-
+```
 
 # 7. Tech Stack
 
@@ -360,6 +360,7 @@ The system follows a **deterministic-first, agent-assisted reconciliation pipeli
 # 11. Example Run (Evaluation Report)
 This is real, unedited output from python run_full_pipeline.py, run on a generated 55-invoice synthetic batch. Numbers vary slightly run to run since the synthetic generator randomizes dates and amounts within each seeded case type — but the shape of the result is consistent.
 
+```
 Running Phase 2: deterministic matcher...
   24/55 auto-resolved deterministically
   31 escalated to the agent chain
@@ -405,8 +406,9 @@ Per-bucket precision / recall:
   human_review     precision=50.0%  recall=15.4%
   exception        precision=100.0%  recall=60.0%
 ============================================================
+```
 
-# 11. Security Design
+# 12. Security Design
 
 The agent chain never has open-ended database access:
 
@@ -418,7 +420,7 @@ The agent chain never has open-ended database access:
 
 ---
 
-# 12. Screenshots
+# 13. Screenshots
 
 ## a) Dashboard
 
@@ -445,7 +447,7 @@ The agent chain never has open-ended database access:
 <img width="1917" height="963" alt="Screenshot 2026-08-30 153410" src="https://github.com/user-attachments/assets/d66602a9-70a0-4bb2-9c04-ddb2b0874932" />
 
 ---
-# 13. Author
+# 14. Author
 
 **Uttam N**
 
