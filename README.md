@@ -358,7 +358,7 @@ The system follows a **deterministic-first, agent-assisted reconciliation pipeli
 └─────────────────────────────────────────────────────────────┘
 ```
 # 11. Example Run (Evaluation Report)
-This is real, unedited output from python run_full_pipeline.py, run on a generated 55-invoice synthetic batch. Numbers vary slightly run to run since the synthetic generator randomizes dates and amounts within each seeded case type — but the shape of the result is consistent.
+This is real, unedited output from python main.py, run on a generated 55-invoice synthetic batch. Numbers vary slightly run to run since the synthetic generator randomizes dates and amounts within each seeded case type — but the shape of the result is consistent.
 
 ```
 Running Phase 2: deterministic matcher...
