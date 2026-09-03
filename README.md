@@ -451,7 +451,7 @@ The agent chain never has open-ended database access:
 
 **Uttam N**
 
-Final Year Computer Science (Cyber Security)
+Final Year Computer Science Student
 
 Passionate about
 
