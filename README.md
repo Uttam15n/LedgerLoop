@@ -16,7 +16,7 @@
 
 # 1. Overview
 
-AuditAgent is a multi-source finance reconciliation system that closes a real finance-ops loop: matching **invoices**, **UPI payments**, and **bank transactions** against each other to verify which ones genuinely settle — and honestly reporting which ones don't.
+LedgerLoop is a multi-source finance reconciliation system that closes a real finance-ops loop: matching **invoices**, **UPI payments**, and **bank transactions** against each other to verify which ones genuinely settle — and honestly reporting which ones don't.
 
 Unlike a single LLM pass over every record, this application uses a **two-phase hybrid design**: a fast, deterministic matcher (pure pandas, zero LLM cost) resolves the easy majority instantly, and an **Agentic workflow powered by LangGraph** only picks up the records that are genuinely ambiguous — deciding what to search for, querying the database through locked-down read-only tools, and reasoning about whether it found a real match.
 
@@ -225,9 +225,9 @@ finance_controller/
 Clone the repository
 
 ```bash
-git clone https://github.com/Uttam15n/AuditAgent.git
+git clone https://github.com/Uttam15n/LedgerLoop.git
 
-cd AuditAgent
+cd LedgerLoop
 ```
 
 Create virtual environment
