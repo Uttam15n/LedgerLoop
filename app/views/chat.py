@@ -36,9 +36,9 @@ if sum(counts.values()) == 0:
     st.stop()
 
 if "chat_display" not in st.session_state:
-    st.session_state.chat_display = []       # list of {"role", "content"} -- for rendering
+    st.session_state.chat_display = []       
 if "chat_lc_messages" not in st.session_state:
-    st.session_state.chat_lc_messages = None  # actual LangChain message objects -- for the LLM
+    st.session_state.chat_lc_messages = None  
 
 
 def _run_chat_turn(user_input: str) -> str:
@@ -77,12 +77,12 @@ def _run_chat_turn(user_input: str) -> str:
     return "I wasn't able to finish looking this up within the allowed number of steps — try a more specific question."
 
 
-# --- render existing conversation ---
+
 for msg in st.session_state.chat_display:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# --- new input ---
+
 user_input = st.chat_input("Ask about an invoice, payment, or bank transaction...")
 if user_input:
     st.session_state.chat_display.append({"role": "user", "content": user_input})

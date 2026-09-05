@@ -35,7 +35,7 @@ class Invoice(Base):
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[str] = mapped_column(String, nullable=False)
     customer_name: Mapped[str] = mapped_column(String, nullable=False)
-    status: Mapped[str] = mapped_column(String, nullable=False)  # "open" | "paid" | "overdue"
+    status: Mapped[str] = mapped_column(String, nullable=False)  
 
     def __repr__(self) -> str:
         return f"<Invoice {self.invoice_number} {self.amount} {self.currency}>"
@@ -46,13 +46,11 @@ class Payment(Base):
     __tablename__ = "payment"
 
     payment_id: Mapped[str] = mapped_column(String, primary_key=True)
-    utr: Mapped[str] = mapped_column(String, nullable=False)              # UPI transaction reference
+    utr: Mapped[str] = mapped_column(String, nullable=False)              
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
-    payer_vpa: Mapped[str] = mapped_column(String, nullable=False)        # UPI virtual payment address
-    invoice_reference: Mapped[str] = mapped_column(String, nullable=True)  # should match invoice.invoice_number
-    # nullable=True is deliberate: a missing/blank invoice_reference is one
-    # of our real-world exception cases, not a data error to reject at load time.
+    payer_vpa: Mapped[str] = mapped_column(String, nullable=False)        
+    invoice_reference: Mapped[str] = mapped_column(String, nullable=True) 
 
     def __repr__(self) -> str:
         return f"<Payment utr={self.utr} {self.amount} -> invoice_ref={self.invoice_reference}>"
@@ -66,16 +64,14 @@ class BankTransaction(Base):
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[str] = mapped_column(String, nullable=False)
-    utr_reference: Mapped[str] = mapped_column(String, nullable=True)     # should match payment.utr, often truncated
+    utr_reference: Mapped[str] = mapped_column(String, nullable=True)     
     description: Mapped[str] = mapped_column(String, nullable=True)
 
     def __repr__(self) -> str:
         return f"<BankTransaction {self.bank_txn_id} {self.amount} utr_ref={self.utr_reference}>"
 
 
-# Convenience lookup so other modules (repository.py, matcher) can go from
-# a schema name (e.g. "invoice") straight to the matching ORM class,
-# instead of hardcoding if/elif chains.
+
 TABLE_MODELS = {
     "invoice": Invoice,
     "payment": Payment,

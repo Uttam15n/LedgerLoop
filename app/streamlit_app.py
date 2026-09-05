@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # so "app.theme" imports work
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  
 
 import streamlit as st
 
@@ -39,7 +39,7 @@ pages = {
         st.Page("views/dashboard.py", title="Dashboard", icon=":material/dashboard:"),
         st.Page("views/ingestion.py", title="Add Your Data", icon=":material/upload_file:"),
         st.Page("views/reconciliation.py", title="Reconciliation", icon=":material/fact_check:"),
-        st.Page("views/chat.py", title="Verify Your Record", icon=":material/chat:"),
+        st.Page("views/chat.py", title="Settlement Q&A Agent", icon=":material/chat:"),
     ]
 }
 

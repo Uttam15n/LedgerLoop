@@ -42,9 +42,7 @@ phase2_results = run_reconciliation(invoice_df, payment_df, bank_df)
 phase2_by_invoice = {r.invoice_id: r for r in phase2_results}
 escalated = [r for r in phase2_results if r.final_status in ("needs_review", "exception")]
 
-# ---------------------------------------------------------------------------
-# Run full batch — show WHICH records need verification first, then run
-# ---------------------------------------------------------------------------
+
 with st.container(border=True):
     st.subheader("Run full batch")
     st.caption(f"Verifying **{len(invoice_df)}** invoices — data source: **{source_label.get(data_source, data_source)}**")
@@ -98,9 +96,7 @@ if run_clicked:
     progress_placeholder.empty()
     st.success("Reconciliation complete — see report below.")
 
-# ---------------------------------------------------------------------------
-# Results
-# ---------------------------------------------------------------------------
+
 report = st.session_state.get("last_report")
 
 if report is not None:
@@ -153,11 +149,7 @@ if report is not None:
             mime="text/csv",
         )
 
-    # -----------------------------------------------------------------------
-    # Ground-truth evaluation -- only possible when synthetic data (with a
-    # known answer key) was used. Real uploaded data has no ground truth
-    # to score against, so this section is skipped for that case.
-    # -----------------------------------------------------------------------
+   
     ground_truth = st.session_state.get("ground_truth")
     if ground_truth is not None:
         st.write("")
@@ -203,9 +195,7 @@ if report is not None:
             "(the known answer key isn't available for your own uploaded data)."
         )
 
-# ---------------------------------------------------------------------------
-# Secondary tool: verify one invoice manually
-# ---------------------------------------------------------------------------
+
 st.write("")
 with st.expander("Verify a specific invoice manually"):
     st.caption("Pick any invoice and see the agent chain's full reasoning for it, live.")

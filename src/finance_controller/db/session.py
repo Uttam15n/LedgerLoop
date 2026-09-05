@@ -16,14 +16,10 @@ from sqlalchemy.orm import sessionmaker, Session
 from finance_controller.config.settings import DATABASE_URL
 from finance_controller.db.models import Base
 
-# `echo=False` keeps SQL statements out of your console by default.
-# Flip to True temporarily if you ever need to debug what SQL is being run.
+
 engine = create_engine(DATABASE_URL, echo=False)
 
-# SessionLocal is a factory: calling SessionLocal() gives you a new,
-# independent database session. We don't create one global session,
-# because that causes subtle bugs when multiple parts of the app
-# (e.g. Streamlit reruns) touch the DB at the same time.
+
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 

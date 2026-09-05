@@ -15,10 +15,7 @@ from typing import Union
 
 import pandas as pd
 
-# Streamlit's file_uploader() returns an UploadedFile object that behaves
-# like a file handle (has .name and is readable). We type it loosely here
-# so this module has zero hard dependency on streamlit itself — keeps
-# ingestion/ testable without spinning up a UI.
+
 FileLike = Union[str, Path, "object"]
 
 
@@ -67,9 +64,7 @@ def load_file_to_dataframe(file: FileLike) -> pd.DataFrame:
     except UnsupportedFileTypeError:
         raise
     except Exception as e:
-        # Wrap pandas' raw parse errors with the filename so the user
-        # (via Streamlit) sees which file actually failed, not a bare
-        # "tokenizing error" with no context.
+        
         raise ValueError(f"Failed to read '{filename}': {e}") from e
 
     return df
@@ -127,7 +122,7 @@ def load_excel_workbook(file: FileLike, expected_keys: list[str]) -> dict[str, p
         )
 
     try:
-        sheets = pd.read_excel(file, sheet_name=None)  # dict of {sheet_name: DataFrame}
+        sheets = pd.read_excel(file, sheet_name=None)  
     except Exception as e:
         raise ValueError(f"Failed to read workbook '{filename}': {e}") from e
 

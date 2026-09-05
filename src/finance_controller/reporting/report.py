@@ -27,8 +27,8 @@ from finance_controller.config.settings import CONFIDENCE_THRESHOLDS
 @dataclass
 class InvoiceReportRow:
     invoice_id: str
-    bucket: str                       # "auto_approved" | "human_review" | "exception"
-    resolution_path: str              # "phase2_deterministic" | "phase3_agent"
+    bucket: str                       
+    resolution_path: str             
     confidence: float
     matched_payment_id: str | None
     matched_bank_txn_id: str | None
@@ -40,11 +40,11 @@ class InvoiceReportRow:
 class ReconciliationReport:
     rows: list[InvoiceReportRow]
     total: int
-    auto_match_rate: float            # phase2-only, deterministic, reproducible
-    final_resolution_rate: float      # auto_approved / total, AFTER agent chain too
+    auto_match_rate: float            
+    final_resolution_rate: float      
     bucket_counts: dict[str, int]
     exception_category_counts: dict[str, int]
-    phase3_stats: dict                # tool calls, records escalated, etc.
+    phase3_stats: dict                
 
     def print_summary(self) -> None:
         print("=" * 60)
@@ -75,7 +75,7 @@ class ReconciliationReport:
 
 def build_report(
     phase2_results: list[ReconciliationResult],
-    phase3_outcomes: list[dict],  # list of final ReconciliationState dicts from run_agent_chain()
+    phase3_outcomes: list[dict],  
 ) -> ReconciliationReport:
     """
     Combine Phase 2 + Phase 3 outcomes into the final report.
@@ -94,13 +94,13 @@ def build_report(
 
     for r in phase2_results:
         if r.invoice_id not in escalated_ids:
-            # Phase 2 alone resolved this -- must have been "fully_reconciled"
+            
             # for it to not be escalated (see matching.pipeline's rollup logic).
             rows.append(InvoiceReportRow(
                 invoice_id=r.invoice_id,
                 bucket="auto_approved",
                 resolution_path="phase2_deterministic",
-                confidence=1.0,  # deterministic match, not a probabilistic score
+                confidence=1.0,  
                 matched_payment_id=r.matched_payment_id,
                 matched_bank_txn_id=r.matched_bank_txn_id,
                 exception_category=None,

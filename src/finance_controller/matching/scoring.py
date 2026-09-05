@@ -19,9 +19,7 @@ from difflib import SequenceMatcher
 
 from finance_controller.config.settings import MATCH_TOLERANCE
 
-# Signal weights — must sum to 1.0. Kept as constants here (not settings.py)
-# because they're specific to HOW scoring combines signals, not a tolerance
-# policy a controller would tune independently.
+
 WEIGHT_REFERENCE = 0.40
 WEIGHT_AMOUNT = 0.35
 WEIGHT_DATE = 0.15
@@ -35,7 +33,7 @@ class ScoreResult:
     amount_score: float
     date_score: float
     text_score: float
-    reasons: list[str]  # human-readable notes, feeds later exception reporting
+    reasons: list[str]  
 
     def summary(self) -> str:
         return (
@@ -50,9 +48,7 @@ def _score_reference(ref_a: str, ref_b: str) -> tuple[float, str | None]:
         return 0.0, "one or both references missing"
     if ref_a == ref_b:
         return 1.0, None
-    # Partial credit for a "contains" relationship — this is exactly what
-    # catches a truncated/reformatted UTR (e.g. bank kept only the last 8
-    # digits, or added a prefix/dashes).
+    
     a_clean = ref_a.replace("-", "").replace(" ", "")
     b_clean = ref_b.replace("-", "").replace(" ", "")
     if a_clean in b_clean or b_clean in a_clean:
@@ -115,12 +111,7 @@ def score_pair(
 
     text_score = _score_text(text_a, text_b)
 
-    # If neither side supplied text, the text signal is unavailable for this
-    # hop (e.g. invoice<->payment has no comparable free-text field) -- not
-    # the same thing as text being present but dissimilar. Redistribute its
-    # weight across the other three signals instead of wasting it, so a
-    # perfect ref+amount+date match can still reach 1.0 rather than being
-    # capped at (1 - WEIGHT_TEXT).
+    
     text_available = bool(text_a) and bool(text_b)
     if text_available:
         w_ref, w_amount, w_date, w_text = WEIGHT_REFERENCE, WEIGHT_AMOUNT, WEIGHT_DATE, WEIGHT_TEXT

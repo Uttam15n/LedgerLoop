@@ -29,21 +29,17 @@ from finance_controller.agents.tools import (
     search_by_date_range,
 )
 
-AMOUNT_SEARCH_TOLERANCE_PCT = 0.05   # wider net than Phase 2's fee tolerance -- deliberately broad here
-DATE_SEARCH_WINDOW_DAYS = 10          # wider than Phase 2's 3-day window -- we're trying harder now
+AMOUNT_SEARCH_TOLERANCE_PCT = 0.05   
+DATE_SEARCH_WINDOW_DAYS = 10          
 
 
-# ---------------------------------------------------------------------------
-# Router node
-# ---------------------------------------------------------------------------
+
 def router_node(state: ReconciliationState) -> dict:
     """Decide whether to search for a payment, a bank_transaction, or both."""
     hop1 = state["phase2_hop1_status"]
     hop2 = state["phase2_hop2_status"]
 
-    # Ambiguous/failed statuses at each hop -- these are the ones worth a
-    # fresh, broader search. "auto_matched" hops are already resolved and
-    # don't need re-searching, even if the OTHER hop is the problem.
+    
     needs_search = {"no_match", "duplicate_candidate", "human_review"}
 
     hop1_needs_search = hop1 in needs_search
@@ -59,29 +55,24 @@ def router_node(state: ReconciliationState) -> dict:
         target = "bank_transaction"
         rationale = f"Payment is confirmed but the bank hop is unresolved (hop2={hop2}); searching bank transactions."
     else:
-        # Shouldn't normally happen -- both hops fine means Phase 2 would
-        # have auto-resolved it and it wouldn't reach this graph at all.
+        
         target = "both"
         rationale = "Unexpected state (both hops appear resolved); searching both defensively."
 
     return {"route_target": target, "route_rationale": rationale}
 
 
-# ---------------------------------------------------------------------------
-# Search node
-# ---------------------------------------------------------------------------
+
 def _search_payments(state: ReconciliationState) -> tuple[list[dict], list[SearchAttempt]]:
     attempts: list[SearchAttempt] = []
 
-    # 1. try the exact/partial reference match first -- cheapest, most
-    #    precise, and correctly surfaces duplicate payments on its own
-    #    (both share the same invoice_reference).
+   
     rows = search_by_reference("payment", "invoice_reference", state["invoice_number"])
     attempts.append({"tool_name": "search_by_reference", "arguments": {"table_key": "payment", "column": "invoice_reference", "value": state["invoice_number"]}, "result_count": len(rows)})
     if rows:
         return rows, attempts
 
-    # 2. broaden: amount range, in case the reference was blank/malformed
+    
     lo = state["invoice_amount"] * (1 - AMOUNT_SEARCH_TOLERANCE_PCT)
     hi = state["invoice_amount"] * (1 + AMOUNT_SEARCH_TOLERANCE_PCT)
     rows = search_by_amount_range("payment", lo, hi)
@@ -89,7 +80,7 @@ def _search_payments(state: ReconciliationState) -> tuple[list[dict], list[Searc
     if rows:
         return rows, attempts
 
-    # 3. last resort: wider date window than Phase 2 used
+    
     from datetime import datetime, timedelta
     inv_date = datetime.fromisoformat(state["invoice_date"])
     start = (inv_date - timedelta(days=DATE_SEARCH_WINDOW_DAYS)).date().isoformat()
@@ -102,7 +93,7 @@ def _search_payments(state: ReconciliationState) -> tuple[list[dict], list[Searc
 def _search_bank_transactions(state: ReconciliationState) -> tuple[list[dict], list[SearchAttempt]]:
     attempts: list[SearchAttempt] = []
 
-    # 1. amount range first -- tighter and cheaper than a date scan
+    
     lo = state["invoice_amount"] * (1 - AMOUNT_SEARCH_TOLERANCE_PCT)
     hi = state["invoice_amount"] * (1 + AMOUNT_SEARCH_TOLERANCE_PCT)
     rows = search_by_amount_range("bank_transaction", lo, hi)
@@ -110,7 +101,7 @@ def _search_bank_transactions(state: ReconciliationState) -> tuple[list[dict], l
     if rows:
         return rows, attempts
 
-    # 2. last resort: wider date window
+    
     from datetime import datetime, timedelta
     inv_date = datetime.fromisoformat(state["invoice_date"])
     start = (inv_date - timedelta(days=DATE_SEARCH_WINDOW_DAYS)).date().isoformat()
@@ -142,9 +133,7 @@ def search_node(state: ReconciliationState) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
-# Reasoning node (the only node that calls an LLM)
-# ---------------------------------------------------------------------------
+
 REASONING_SYSTEM_PROMPT = """You are a finance reconciliation assistant. You are given ONE invoice \
 that a deterministic matching system could not confidently resolve, plus candidate payment and \
 bank transaction records a search tool retrieved.
@@ -234,7 +223,6 @@ def reasoning_node(state: ReconciliationState) -> dict:
     ])
 
     raw = response.content.strip()
-    # Models sometimes wrap JSON in markdown fences despite instructions -- strip defensively.
     if raw.startswith("```"):
         raw = raw.strip("`")
         if raw.startswith("json"):
@@ -244,8 +232,7 @@ def reasoning_node(state: ReconciliationState) -> dict:
     try:
         parsed = json.loads(raw)
     except json.JSONDecodeError:
-        # Fail SAFE: an unparseable LLM response becomes a human_review
-        # exception, never a silent auto-approval.
+        
         return {
             "final_status": "human_review",
             "confidence": 0.0,

@@ -38,11 +38,11 @@ BUCKETS = ["auto_approved", "human_review", "exception"]
 class EvaluationResult:
     overall_accuracy: float
     total_records: int
-    confusion_matrix: pd.DataFrame            # rows = expected, columns = actual
-    per_bucket_precision: dict                 # bucket -> precision
-    per_bucket_recall: dict                    # bucket -> recall
-    per_case_type_accuracy: pd.DataFrame        # case_type -> accuracy, n
-    mismatches: pd.DataFrame                    # rows where actual != expected, for inspection
+    confusion_matrix: pd.DataFrame            
+    per_bucket_precision: dict                
+    per_bucket_recall: dict                   
+    per_case_type_accuracy: pd.DataFrame       
+    mismatches: pd.DataFrame                    
 
     def print_summary(self) -> None:
         print("=" * 60)

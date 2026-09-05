@@ -41,7 +41,7 @@ CUSTOMER_NAMES = [
 
 CURRENCY = "INR"
 
-# case_type -> count. Must sum to SYNTHETIC_INVOICE_COUNT.
+
 CASE_MIX = {
     "clean": 35,
     "fee_or_date_edge": 8,
@@ -75,10 +75,10 @@ def _mangled_utr(utr: str, rng: random.Random) -> str:
     """Simulate a bank feed truncating/reformatting a UTR."""
     choice = rng.choice(["truncate", "prefix", "dashes"])
     if choice == "truncate":
-        return utr[-8:]                       # bank only kept last 8 digits
+        return utr[-8:]                       
     if choice == "prefix":
-        return "UTR" + utr                     # bank prefixed it
-    return "-".join([utr[:4], utr[4:8], utr[8:]])  # bank reformatted with dashes
+        return "UTR" + utr                     
+    return "-".join([utr[:4], utr[4:8], utr[8:]])  
 
 
 def generate_synthetic_batch(
@@ -125,7 +125,7 @@ def generate_synthetic_batch(
             "status": "open",
         })
 
-        expected_outcome = None  # filled in per case below
+        expected_outcome = None  
 
         if case_type == "clean":
             utr = _random_utr(rng)
@@ -152,14 +152,14 @@ def generate_synthetic_batch(
             utr = _random_utr(rng)
             sub_case = rng.choice(["fee", "date_lag"])
             if sub_case == "fee":
-                fee_pct = rng.uniform(0.005, 0.018)  # within 2% tolerance
+                fee_pct = rng.uniform(0.005, 0.018)  
                 pay_amount = round(amount * (1 - fee_pct), 2)
                 pay_date = invoice_date + timedelta(days=rng.randint(0, 2))
                 bank_date = pay_date
                 bank_amount = pay_amount
             else:
                 pay_amount = amount
-                pay_date = invoice_date + timedelta(days=3)  # right at tolerance edge
+                pay_date = invoice_date + timedelta(days=3)  
                 bank_date = pay_date + timedelta(days=2)
                 bank_amount = amount
 
@@ -181,7 +181,7 @@ def generate_synthetic_batch(
 
         elif case_type == "missing_payment":
             expected_outcome = "exception_missing_payment"
-            # no payment, no bank row at all
+            
 
         elif case_type == "missing_bank_hit":
             utr = _random_utr(rng)
@@ -193,7 +193,7 @@ def generate_synthetic_batch(
                 "invoice_reference": invoice_number,
             })
             payment_seq += 1
-            # deliberately no bank_transaction row
+            
             expected_outcome = "exception_missing_bank_hit"
 
         elif case_type == "duplicate_candidate":
@@ -229,7 +229,7 @@ def generate_synthetic_batch(
             bank_txns.append({
                 "bank_txn_id": f"BANK{bank_seq:04d}", "date": pay_date,
                 "amount": amount, "currency": CURRENCY,
-                "utr_reference": _mangled_utr(utr, rng),  # doesn't exact-match payment.utr
+                "utr_reference": _mangled_utr(utr, rng),  
                 "description": f"UPI credit from {customer}",
             })
             bank_seq += 1
@@ -250,11 +250,10 @@ def generate_synthetic_batch(
                 "bank_txn_id": f"BANK{bank_seq:04d}", "date": pay_date,
                 "amount": amount, "currency": CURRENCY,
                 "utr_reference": utr,
-                "description": payload,   # the adversarial content lives here
+                "description": payload,   
             })
             bank_seq += 1
-            expected_outcome = "auto_match"  # should match fine IF description is never
-                                              # fed into a query/prompt as instructions
+            expected_outcome = "auto_match"  
 
         ground_truth.append({
             "invoice_id": invoice_id,

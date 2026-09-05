@@ -23,9 +23,7 @@ import pandas as pd
 from finance_controller.config.settings import MATCH_TOLERANCE, CONFIDENCE_THRESHOLDS
 from finance_controller.matching.scoring import score_pair, ScoreResult
 
-# If a source row's top two candidates score within this margin of each
-# other, we flag it as a duplicate/ambiguous match regardless of what the
-# top score alone would suggest -- picking one silently would be wrong.
+
 DUPLICATE_SCORE_MARGIN = 0.05
 
 
@@ -38,7 +36,7 @@ class CandidateScore:
 @dataclass
 class MatchOutcome:
     source_id: str
-    status: str                     # "auto_matched" | "human_review" | "no_match" | "duplicate_candidate"
+    status: str                     
     matched_target_id: str | None
     best_score: ScoreResult | None
     all_candidates: list[CandidateScore] = field(default_factory=list)
@@ -82,7 +80,7 @@ def match_one_to_one(
     """
     thresholds = CONFIDENCE_THRESHOLDS
 
-    # --- Step 1 + 2: candidates + scores, per source row ---
+    
     per_source_candidates: dict[str, list[CandidateScore]] = {}
 
     for _, source_row in source_df.iterrows():
@@ -109,11 +107,7 @@ def match_one_to_one(
         scored.sort(key=lambda c: c.score.total, reverse=True)
         per_source_candidates[source_id] = scored
 
-    # --- Step 3: global greedy one-to-one assignment ---
-    # Build every (source, candidate) pair with score > 0, sort globally by
-    # score descending, then walk down claiming source+target once each.
-    # This is what prevents two sources both grabbing the same top target
-    # independently -- assignment is coordinated across the WHOLE batch.
+    
     all_pairs = []
     for source_id, candidates in per_source_candidates.items():
         for c in candidates:
@@ -132,13 +126,12 @@ def match_one_to_one(
         claimed_sources.add(source_id)
         claimed_targets.add(target_id)
 
-    # --- Classify every source row into a final outcome ---
+    
     outcomes = []
     for source_id, candidates in per_source_candidates.items():
         assigned = assignment.get(source_id)
 
-        # duplicate detection: top-2 candidates too close to call, even if
-        # one of them ended up assigned -- a human should confirm this one.
+        
         is_duplicate = (
             len(candidates) >= 2
             and candidates[0].score.total - candidates[1].score.total < DUPLICATE_SCORE_MARGIN

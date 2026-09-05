@@ -17,7 +17,7 @@ st.caption("AI Finance Controller — reconciliation status at a glance")
 
 st.write("")
 
-# --- Database status ---
+
 with st.container(border=True):
     st.subheader("Staging database")
     counts = get_all_counts()
@@ -33,7 +33,7 @@ with st.container(border=True):
 
 st.write("")
 
-# --- Last reconciliation run ---
+
 with st.container(border=True):
     st.subheader("Last reconciliation run")
 

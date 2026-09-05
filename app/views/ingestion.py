@@ -25,7 +25,7 @@ if "validation_results" not in st.session_state:
 st.title("Ingestion")
 st.caption("Bring in invoice, payment, and bank transaction data")
 
-# --- Step 0: reset, so each test cycle can start from a clean slate ---
+
 with st.container(border=True):
     st.subheader("Reset")
     counts = get_all_counts()
@@ -46,7 +46,7 @@ with st.container(border=True):
         st.success(f"Cleared: {deleted}")
         st.rerun()
 
-# --- Step 1 ---
+
 with st.container(border=True):
     st.subheader("1. Get data")
     source_mode = st.radio("Data source", ["Generate synthetic batch", "Upload files"], horizontal=True)
@@ -81,7 +81,7 @@ with st.container(border=True):
 
 st.write("")
 
-# --- Step 2 ---
+
 if st.session_state.raw_data:
     with st.container(border=True):
         st.subheader("2. Preview & validate")

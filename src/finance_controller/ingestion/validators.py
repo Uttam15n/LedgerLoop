@@ -19,9 +19,9 @@ import pandas as pd
 
 from finance_controller.config.settings import SCHEMAS
 
-# Maps the schema's abstract type names to a check function.
+
 _TYPE_CHECKERS = {
-    "string": lambda s: s.astype("string").notna() | s.isna(),  # always true; real check is presence
+    "string": lambda s: s.astype("string").notna() | s.isna(),  
     "float": lambda s: pd.to_numeric(s, errors="coerce").notna(),
     "datetime": lambda s: pd.to_datetime(s, errors="coerce").notna(),
 }
@@ -78,7 +78,7 @@ def validate_dataframe(table_key: str, df: pd.DataFrame) -> ValidationResult:
         # Can't safely check types on columns that don't exist — stop here.
         return ValidationResult(table_key, False, len(df), errors, warnings)
 
-    # 2. unexpected extra columns -> warning only, never blocks a load
+    
     extra_cols = [c for c in df.columns if c not in required_columns]
     if extra_cols:
         warnings.append(f"Unexpected column(s) present, will be ignored downstream: {extra_cols}")
@@ -87,7 +87,7 @@ def validate_dataframe(table_key: str, df: pd.DataFrame) -> ValidationResult:
     for col, declared_type in required_columns.items():
         checker = _TYPE_CHECKERS.get(declared_type)
         if checker is None:
-            continue  # unknown declared type, skip rather than crash
+            continue  
 
         if declared_type == "string":
             null_count = df[col].isna().sum()

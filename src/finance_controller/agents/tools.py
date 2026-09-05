@@ -113,8 +113,7 @@ def search_by_date_range(table_key: str, start_date: str, end_date: str) -> list
     table_name = _validate_table(table_key)
     _validate_column(table_key, "date")
 
-    # Validate the date strings are actually parseable before they touch SQL --
-    # fails loudly with a clear error rather than silently returning nothing.
+    
     datetime.fromisoformat(start_date)
     datetime.fromisoformat(end_date)
 
